@@ -15,13 +15,19 @@ Including another URLconf
 """
 from django.urls import path
 from . import views
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from .views import CreatePostView
 
 app_name = "main"
 
 urlpatterns = [
   path("", views.homepage, name="homepage"),  
+  path("post/",CreatePostView.as_view(),name="add_post"),
+  #path("workstamp/",views.get_workstamp, name="work_stamp"),
   path("register/", views.register, name="register"),
   path("logout/",views.logout_request, name="logout"),
   path("login/",views.login_request, name="login"),
   path("<single_slug>", views.single_slug, name="single_slug"),
 ]    
+
+urlpatterns += staticfiles_urlpatterns()

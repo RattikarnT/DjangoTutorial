@@ -2,9 +2,13 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import Tutorial, TutorialCategory, TutorialSeries
 from django.contrib.auth.forms import AuthenticationForm
+from django.views.generic import CreateView
+from django.urls import reverse_lazy
 from django.contrib.auth import login,logout, authenticate
 from django.contrib import messages 
-from .forms import NewUserForm
+from .forms import NewUserForm, PostForm
+from .models import Post
+
 
 def single_slug(request, single_slug):
 	categories=[c.category_slug for c in TutorialCategory.objects.all()]
@@ -21,8 +25,20 @@ def single_slug(request, single_slug):
 				      "main/category.html",
 				      {"part_ones":series_urls})
 
-		tutorials=[t.tutorial_slug for t in Tutorial.objects.all()]
+	tutorials=[t.tutorial_slug for t in Tutorial.objects.all()]
 	if single_slug in tutorials:
+		this_tutorial=Tutorial.objects.get(tutorial_slug=single_slug)
+		tutorial_from_series=Tutorial.objects.filter(tutorial_series__tutorial_series=this_tutorial.tutorial_series).order_by("tutorial_published")
+		this_tutorial_idx=list(tutorial_from_series).index(this_tutorial)
+		
+
+		return render(request,
+					  "main/tutorial.html",
+					  {"tutorial":this_tutorial,
+					   "sidebar": tutorial_from_series,
+					   "this_tutorial_idx":this_tutorial_idx})
+					   
+		
 		return HttpResponse(f"{single_slug} is a tutorial!!!")
 	return HttpResponse(f"{single_slug} does not correspond to anything.")
 
@@ -80,4 +96,25 @@ def login_request(request):
 	return render(request,
 				  "main/login.html",
 				  {"form":form})
+
+def get_workstamp(request):
+	#if request.method=="POST"
+	form=PostForm(request.POST or None)
+	if form.is_valid():
+		instance=form.save(commit=False)
+		title=form.cleaned_data.get('title')
+		image=form.cleaned_data.get('cover')
+		instance.save()
+
+	context={
+	"form":form,
+	}
+
+	return render(request,"main/post_form.html",context)
+
+class CreatePostView(CreateView):
+	model=Post
+	form_class= PostForm
+	template_name='main/post.html'
+	success_url=reverse_lazy('main:homepage')
 

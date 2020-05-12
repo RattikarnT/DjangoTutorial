@@ -1,0 +1,13 @@
+
+
+<!--templates/post.html -->
+
+<h1>Create Post Page</h1>
+
+<form method="POST" enctype="multipart/form-data">
+	{% csrf_token %}
+	{{form.as_p}}
+	<button class="btn" style="background-color:pink; color:black" type="submit">ลงชื่อ</button>
+</form>
+
+
