@@ -22,12 +22,19 @@ app_name = "main"
 
 urlpatterns = [
   path("", views.homepage, name="homepage"),  
-  path("post/",CreatePostView.as_view(),name="add_post"),
-  #path("workstamp/",views.get_workstamp, name="work_stamp"),
+  path("post",CreatePostView.as_view(),name="add_post"),
+  path("workstamp",views.get_workstamp, name="work_stamp"),
+  path("detail",views.post_detail, name="post_detail"),
+  path("list",views.post_list, name="post_list"),
+  path("update",views.post_update, name="post_update"),
+  path("delete",views.post_delete, name="post_delete"),
   path("register/", views.register, name="register"),
   path("logout/",views.logout_request, name="logout"),
   path("login/",views.login_request, name="login"),
   path("<single_slug>", views.single_slug, name="single_slug"),
 ]    
 
+#urlpatterns += staticfiles_urlpatterns()
+#if settings.DEBUG:
 urlpatterns += staticfiles_urlpatterns()
+  #urlpatterns+=static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

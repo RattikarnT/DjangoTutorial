@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from .models import Tutorial, TutorialCategory, TutorialSeries
 from django.contrib.auth.forms import AuthenticationForm
@@ -56,7 +56,7 @@ def register(request):
 		if form.is_valid():
 			user=form.save()
 			username=form.cleaned_data.get('username')
-			messages.success(request, f"New Accout Created: {username}")
+			messages.success(request, f"New Account Created: {username}")
 			login(request, user)
 			messages.info(request, f"You are now logged in as {username}")
 			return redirect("main:homepage")
@@ -78,7 +78,6 @@ def login_request(request):
 	if request.method=="POST":
 		form=AuthenticationForm(request, data=request.POST)
 		if form.is_valid():
-			user=form.save()
 			username=form.cleaned_data.get('username')
 			password=form.cleaned_data.get('password')
 			user=authenticate(username=username, password=password)
@@ -98,19 +97,44 @@ def login_request(request):
 				  {"form":form})
 
 def get_workstamp(request):
-	#if request.method=="POST"
 	form=PostForm(request.POST or None)
-	if form.is_valid():
-		instance=form.save(commit=False)
-		title=form.cleaned_data.get('title')
-		image=form.cleaned_data.get('cover')
-		instance.save()
-
+	if request.method=="POST":
+		if form.is_valid():
+			instance=form.save(commit=False)
+			title=form.cleaned_data.get('title')
+			image=form.cleaned_data.get('cover')
+			timestamp=form.cleaned_data.get('timestamp')
+			instance.save()
+			messages.success(request, f"ทำการลงชื่อเข้าทำงานสำเร็จ: {title}, เมื่อเวลา: {timestamp}")
+			return redirect("main:homepage")
+		
 	context={
 	"form":form,
 	}
 
 	return render(request,"main/post_form.html",context)
+
+def post_detail(request):
+	#instance=Post.objects.get(id=3)
+	context= {
+			"title":"Detail"
+	}
+	return render(request, "main/index.html",context)
+
+def post_list(request):
+	queryset = Post.objects.all()
+	context={
+		"object_list": queryset,
+		"title":"List"
+	}
+	return render(request, "main/index.html", context)
+
+def post_update(request):
+	return HttpResponse("<h1>Update</h1>")
+
+def post_delete(request):
+	return HttpResponse("<h1>Delete</h1>")
+
 
 class CreatePostView(CreateView):
 	model=Post
